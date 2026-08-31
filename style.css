@@ -50,3 +50,18 @@ button {
     border-radius: 15px;
     background: #1f2937;
 }
+
+.web-generada {
+    padding: 30px;
+    border-radius: 15px;
+    background: #111827;
+}
+
+.web-generada h1 {
+    font-size: 35px;
+}
+
+.web-generada button {
+    background: white;
+    color: #111827;
+}
