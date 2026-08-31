@@ -1,14 +1,15 @@
 let boton = document.getElementById("generar");
+let caja = document.getElementById("peticion");
+let resultado = document.getElementById("resultado");
 
-boton.addEventListener("click", async function() {
-
-    let caja = document.getElementById("peticion");
-    let resultado = document.getElementById("resultado");
+boton.addEventListener("click", function() {
 
     let texto = caja.value;
 
-    resultado.textContent = "Dorrón está pensando... 🤖";
-
-    console.log("Petición del usuario:", texto);
+    resultado.innerHTML = `
+        <h1>${texto}</h1>
+        <p>🔥 ¡Esta es tu primera web generada por Dorrón!</p>
+        <button>Entrar</button>
+    `;
 
 });
