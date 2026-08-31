@@ -8,7 +8,7 @@ boton.addEventListener("click", function() {
 
     resultado.innerHTML = `
         <h1>${texto}</h1>
-        <p>🔥 ¡Esta es tu primera web generada por Dorrón!</p>
+        <p>🚨 PRUEBA DORRÓN 123 🚨</p>
         <button>Entrar</button>
     `;
 
