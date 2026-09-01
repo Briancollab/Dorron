@@ -6,72 +6,47 @@ let resultado = document.getElementById("resultado");
 let estado = document.getElementById("estado");
 let preview = document.getElementById("webPreview");
 
-boton.addEventListener("click", function() {
+boton.addEventListener("click", async function() {
 
-    let texto = caja.value;
+    let texto = caja.value.trim();
 
-    if (texto.trim() === "") {
+    if (texto === "") {
         return;
     }
 
-    // Ocultar la vista previa
-    resultado.style.display = "none";
-
-    // Mostrar la animación
     loading.style.display = "block";
+    resultado.style.display = "none";
+    estado.textContent = "Conectando con Dorrón...";
 
-    estado.textContent = "Analizando tu petición...";
+    try {
 
-    setTimeout(function() {
-        estado.textContent = "Diseñando la estructura...";
-    }, 700);
+        let respuesta = await fetch("https://dorron.onrender.com/");
 
-    setTimeout(function() {
-        estado.textContent = "Generando código...";
-    }, 1400);
+        let datos = await respuesta.json();
 
-    setTimeout(function() {
+        estado.textContent = datos.message;
 
-        let web = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        padding: 40px;
-                        text-align: center;
-                    }
+        setTimeout(function() {
+            loading.style.display = "none";
+            resultado.style.display = "block";
 
-                    button {
-                        padding: 12px 20px;
-                        border: none;
-                        border-radius: 8px;
-                        cursor: pointer;
-                    }
-                </style>
-            </head>
+            preview.srcdoc = `
+                <html>
+                    <body style="font-family: Arial; padding: 40px; text-align: center;">
+                        <h1>${texto}</h1>
+                        <p>${datos.message}</p>
+                    </body>
+                </html>
+            `;
 
-            <body>
+        }, 1000);
 
-                <h1>${texto}</h1>
+    } catch (error) {
 
-                <p>Esta es una web creada por Dorrón 🚀</p>
+        loading.style.display = "block";
+        estado.textContent = "❌ No se pudo conectar con el servidor.";
 
-                <button>Empezar</button>
-
-            </body>
-            </html>
-        `;
-
-        preview.srcdoc = web;
-
-        // Ocultar animación
-        loading.style.display = "none";
-
-        // Mostrar vista previa
-        resultado.style.display = "block";
-
-    }, 2000);
+        console.error(error);
+    }
 
 });
