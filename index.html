@@ -11,6 +11,7 @@
 <body>
 
     <div class="app">
+
         <h1>Dorrón</h1>
 
         <h2>Crea tu página web con IA</h2>
@@ -25,9 +26,29 @@
         <button id="generar">Generar página 🚀</button>
 
         <div class="preview">
-    <h3>Vista previa</h3>
-    <iframe id="webPreview"></iframe>
+
+            <!-- ANIMACIÓN -->
+            <div id="loading" class="loading">
+
+                <div class="loader"></div>
+
+                <h3>Dorrón está creando tu web...</h3>
+
+                <p id="estado">Analizando tu petición...</p>
+
+            </div>
+
+            <!-- VISTA PREVIA -->
+            <div id="resultado" class="resultado">
+
+                <h3>Vista previa</h3>
+
+                <iframe id="webPreview"></iframe>
+
+            </div>
+
         </div>
+
     </div>
 
     <script src="script.js"></script>
