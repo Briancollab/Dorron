@@ -59,9 +59,9 @@ boton.addEventListener("click", async () => {
         preview.srcdoc = codigo;
 
     } catch (error) {
-        console.error("Error:", error);
+    console.error("Error:", error);
 
-        estado.textContent =
-            "❌ No se pudo generar la página. Revisa la conexión con Dorrón IA.";
+    loading.style.display = "block";
+    estado.textContent = "❌ Error: " + error.message;
     }
 });
