@@ -1,4 +1,3 @@
-
 const boton = document.getElementById("generar");
 const caja = document.getElementById("peticion");
 
@@ -32,17 +31,14 @@ boton.addEventListener("click", async () => {
         });
 
         if (!respuesta.ok) {
-            throw new Error(`Error del servidor: ${respuesta.status}`);
+            const errorText = await respuesta.text();
+            throw new Error(`Servidor ${respuesta.status}: ${errorText}`);
         }
 
         const datos = await respuesta.json();
 
         console.log("Respuesta de Dorrón:", datos);
 
-        /*
-         * El backend puede devolver el código generado
-         * en distintos campos. Intentamos los más habituales.
-         */
         const codigo =
             datos.html ||
             datos.code ||
@@ -59,9 +55,9 @@ boton.addEventListener("click", async () => {
         preview.srcdoc = codigo;
 
     } catch (error) {
-    console.error("Error:", error);
+        console.error("Error:", error);
 
-    loading.style.display = "block";
-    estado.textContent = "❌ Error: " + error.message;
+        loading.style.display = "block";
+        estado.textContent = "❌ " + error.message;
     }
 });
