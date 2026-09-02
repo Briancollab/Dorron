@@ -1,52 +1,67 @@
-let boton = document.getElementById("generar");
-let caja = document.getElementById("peticion");
 
-let loading = document.getElementById("loading");
-let resultado = document.getElementById("resultado");
-let estado = document.getElementById("estado");
-let preview = document.getElementById("webPreview");
+const boton = document.getElementById("generar");
+const caja = document.getElementById("peticion");
 
-boton.addEventListener("click", async function() {
+const loading = document.getElementById("loading");
+const resultado = document.getElementById("resultado");
+const estado = document.getElementById("estado");
+const preview = document.getElementById("webPreview");
 
-    let texto = caja.value.trim();
+const API_URL = "https://dorron-api-backend--brianstiven608.replit.app";
 
-    if (texto === "") {
-        return;
-    }
+boton.addEventListener("click", async () => {
+    const texto = caja.value.trim();
+
+    if (!texto) return;
 
     loading.style.display = "block";
     resultado.style.display = "none";
-    estado.textContent = "Conectando con Dorrón...";
+    estado.textContent = "Conectando con Dorrón IA...";
 
     try {
+        estado.textContent = "Dorrón está creando tu web...";
 
-        let respuesta = await fetch("https://dorron.onrender.com/");
+        const respuesta = await fetch(`${API_URL}/api/ai`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: texto
+            })
+        });
 
-        let datos = await respuesta.json();
+        if (!respuesta.ok) {
+            throw new Error(`Error del servidor: ${respuesta.status}`);
+        }
 
-        estado.textContent = datos.message;
+        const datos = await respuesta.json();
 
-        setTimeout(function() {
-            loading.style.display = "none";
-            resultado.style.display = "block";
+        console.log("Respuesta de Dorrón:", datos);
 
-            preview.srcdoc = `
-                <html>
-                    <body style="font-family: Arial; padding: 40px; text-align: center;">
-                        <h1>${texto}</h1>
-                        <p>${datos.message}</p>
-                    </body>
-                </html>
-            `;
+        /*
+         * El backend puede devolver el código generado
+         * en distintos campos. Intentamos los más habituales.
+         */
+        const codigo =
+            datos.html ||
+            datos.code ||
+            datos.content ||
+            datos.output;
 
-        }, 1000);
+        if (!codigo) {
+            throw new Error("La IA no devolvió código HTML.");
+        }
+
+        loading.style.display = "none";
+        resultado.style.display = "block";
+
+        preview.srcdoc = codigo;
 
     } catch (error) {
+        console.error("Error:", error);
 
-        loading.style.display = "block";
-        estado.textContent = "❌ No se pudo conectar con el servidor.";
-
-        console.error(error);
+        estado.textContent =
+            "❌ No se pudo generar la página. Revisa la conexión con Dorrón IA.";
     }
-
 });
