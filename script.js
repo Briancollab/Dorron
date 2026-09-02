@@ -1,4 +1,4 @@
-coconst boton = document.getElementById("generar");
+const boton = document.getElementById("generar");
 const caja = document.getElementById("peticion");
 
 const loading = document.getElementById("loading");
