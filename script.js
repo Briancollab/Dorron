@@ -6,15 +6,12 @@ const resultado = document.getElementById("resultado");
 const estado = document.getElementById("estado");
 const preview = document.getElementById("webPreview");
 
-const API_URL = "https://dorron-api-backend--brianstiven608.replit.app";
-
-// Elementos de la interfaz
 const app = document.querySelector(".app");
 const workspace = document.querySelector(".workspace");
 const aiPanel = document.querySelector(".ai-panel");
 const previewArea = document.querySelector(".preview-area");
 
-let proyectoGenerado = false;
+const API_URL = "https://dorron-api-backend--brianstiven608.replit.app";
 
 function mostrarEstado(texto) {
     if (estado) {
@@ -22,10 +19,14 @@ function mostrarEstado(texto) {
     }
 }
 
-function activarModoBuilder() {
-    if (!app) return;
+function esperar(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    app.classList.add("builder-active");
+function activarModoBuilder() {
+    if (app) {
+        app.classList.add("builder-active");
+    }
 
     if (workspace) {
         workspace.classList.add("builder-workspace");
@@ -53,7 +54,7 @@ function construirPreview(files) {
 
     let html = indexFile.content;
 
-    // Añadir los CSS generados por la IA
+    // CSS generado por la IA
     const cssFiles = files.filter(file =>
         file.operation !== "delete" &&
         file.path?.toLowerCase().endsWith(".css") &&
@@ -72,13 +73,16 @@ ${css}
 `;
 
         if (html.toLowerCase().includes("</head>")) {
-            html = html.replace(/<\/head>/i, `${styleTag}</head>`);
+            html = html.replace(
+                /<\/head>/i,
+                `${styleTag}</head>`
+            );
         } else {
             html = `${styleTag}${html}`;
         }
     }
 
-    // Añadir los JavaScript generados por la IA
+    // JavaScript generado por la IA
     const jsFiles = files.filter(file =>
         file.operation !== "delete" &&
         file.path?.toLowerCase().endsWith(".js") &&
@@ -97,7 +101,10 @@ ${js}
 `;
 
         if (html.toLowerCase().includes("</body>")) {
-            html = html.replace(/<\/body>/i, `${scriptTag}</body>`);
+            html = html.replace(
+                /<\/body>/i,
+                `${scriptTag}</body>`
+            );
         } else {
             html += scriptTag;
         }
@@ -106,35 +113,53 @@ ${js}
     return html;
 }
 
-boton.addEventListener("click", async () => {
+// Comprobación visible de que el script está cargado
+console.log("🔥 DORRÓN SCRIPT CARGADO");
+
+if (!boton) {
+    console.error("❌ No se encontró el botón Generar.");
+} else {
+    console.log("✅ Botón Generar encontrado.");
+}
+
+boton?.addEventListener("click", async () => {
+
+    console.log("💨 DORRÓN: BOTÓN GENERAR PULSADO");
+
     const texto = caja.value.trim();
 
-    if (!texto) return;
+    if (!texto) {
+        mostrarEstado("✏️ Escribe primero qué quieres crear.");
+        return;
+    }
 
-    // Cambiar inmediatamente a la interfaz de builder
-    activarModoBuilder();
+    // SEÑAL INMEDIATA
+    boton.disabled = true;
+    boton.innerHTML = "<span>Creando...</span><span>⚡</span>";
 
-    proyectoGenerado = true;
-
-    loading.style.display = "block";
+    loading.style.display = "flex";
     resultado.style.display = "none";
 
-    boton.disabled = true;
+    mostrarEstado("⚡ Dorrón ha recibido tu petición.");
+
+    // Cambiamos la interfaz inmediatamente
+    activarModoBuilder();
+
+    console.log("🚀 Enviando petición a Dorrón IA:", texto);
 
     try {
+
+        await esperar(300);
+
         mostrarEstado("🔍 Analizando tu petición...");
+
         await esperar(500);
 
-        mostrarEstado("🧠 Dorrón IA está diseñando la estructura...");
+        mostrarEstado("🧠 Preparando la generación del proyecto...");
+
         await esperar(500);
 
-        mostrarEstado("🎨 Diseñando el estilo y el fondo global...");
-        await esperar(500);
-
-        mostrarEstado("💻 Generando HTML, CSS y JavaScript...");
-        await esperar(500);
-
-        mostrarEstado("📦 Preparando los archivos del proyecto...");
+        mostrarEstado("📡 Conectando con Dorrón IA...");
 
         const respuesta = await fetch(`${API_URL}/api/ai`, {
             method: "POST",
@@ -146,30 +171,46 @@ boton.addEventListener("click", async () => {
             })
         });
 
+        console.log(
+            "📡 Respuesta HTTP:",
+            respuesta.status,
+            respuesta.statusText
+        );
+
         if (!respuesta.ok) {
             const errorText = await respuesta.text();
+
             throw new Error(
                 `Servidor ${respuesta.status}: ${errorText}`
             );
         }
 
-        mostrarEstado("📥 Recibiendo el código generado...");
+        mostrarEstado("📥 Recibiendo código de Gemini...");
 
         const datos = await respuesta.json();
 
-        console.log("Respuesta completa de Dorrón:", datos);
+        console.log("🤖 Respuesta completa de Dorrón:", datos);
 
         const files = datos?.response?.files;
 
         if (!Array.isArray(files) || files.length === 0) {
             throw new Error(
-                "La IA no devolvió archivos para la web."
+                "La IA respondió, pero no devolvió archivos."
             );
         }
 
-        mostrarEstado("🖥️ Preparando la Preview...");
+        console.log("📦 Archivos recibidos:", files);
+
+        mostrarEstado("🛠️ Preparando los archivos de la web...");
 
         const html = construirPreview(files);
+
+        console.log(
+            "🖥️ HTML preparado para Preview:",
+            html
+        );
+
+        mostrarEstado("🖥️ Renderizando la Preview...");
 
         preview.srcdoc = html;
 
@@ -181,18 +222,18 @@ boton.addEventListener("click", async () => {
         resultado.style.display = "block";
 
     } catch (error) {
-        console.error("Error de Dorrón:", error);
 
-        loading.style.display = "block";
+        console.error("❌ ERROR DE DORRÓN:", error);
+
+        loading.style.display = "flex";
         resultado.style.display = "none";
 
         mostrarEstado("❌ " + error.message);
 
     } finally {
+
         boton.disabled = false;
+
+        boton.innerHTML = "<span>Generar</span><span>↑</span>";
     }
 });
-
-function esperar(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
