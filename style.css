@@ -925,7 +925,21 @@ button {
 
     margin-top: 8px;
 }
+/* BUILDER MODE */
 
+.app.builder-active .workspace {
+    flex-direction: row-reverse;
+}
+
+.app.builder-active .ai-panel {
+    border-left: 0;
+    border-right: 1px solid var(--border);
+}
+
+.app.builder-active .preview-area {
+    flex: 1;
+    min-width: 0;
+}
 /* RESPONSIVE */
 
 @media (max-width: 1000px) {
