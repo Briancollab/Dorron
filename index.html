@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -40,12 +40,13 @@
 
         <div class="sidebar-section">
 
-            <span class="section-title">PROYECTO</span>
+            <span class="section-title">PROYECTOS</span>
 
-            <div class="project-item active">
-                <span class="project-dot"></span>
-                <span>Mi proyecto</span>
-            </div>
+            <!-- Se rellena dinámicamente desde script.js -->
+            <div
+                id="projectList"
+                class="project-list"
+            ></div>
 
         </div>
 
@@ -53,12 +54,18 @@
 
             <span class="section-title">HERRAMIENTAS</span>
 
-            <div class="tool-item active-tool" id="aiTool">
+            <div
+                class="tool-item active-tool"
+                id="aiTool"
+            >
                 <span>✦</span>
                 Dorrón IA
             </div>
 
-            <div class="tool-item" id="previewTool">
+            <div
+                class="tool-item"
+                id="previewTool"
+            >
                 <span>◫</span>
                 Preview
             </div>
@@ -98,7 +105,10 @@
                 <strong>Dorrón</strong>
             </div>
 
-            <div class="project-name">
+            <div
+                class="project-name"
+                id="projectName"
+            >
                 <span class="live-dot"></span>
                 Proyecto sin título
             </div>
@@ -107,6 +117,15 @@
 
                 <button
                     class="top-button"
+                    id="saveProject"
+                    type="button"
+                >
+                    💾 <span>Guardar</span>
+                </button>
+
+                <button
+                    class="top-button"
+                    id="shareProject"
                     type="button"
                 >
                     ↗ <span>Compartir</span>
@@ -114,6 +133,7 @@
 
                 <button
                     class="publish-button"
+                    id="publishProject"
                     type="button"
                 >
                     Publicar
@@ -143,6 +163,7 @@
                             class="device active"
                             type="button"
                             data-device="desktop"
+                            aria-label="Vista escritorio"
                         >
                             ▣
                         </button>
@@ -151,6 +172,7 @@
                             class="device"
                             type="button"
                             data-device="tablet"
+                            aria-label="Vista tablet"
                         >
                             ▯
                         </button>
@@ -159,6 +181,7 @@
                             class="device"
                             type="button"
                             data-device="mobile"
+                            aria-label="Vista móvil"
                         >
                             ▥
                         </button>
@@ -169,6 +192,7 @@
                         class="refresh-preview"
                         id="refreshPreview"
                         type="button"
+                        aria-label="Actualizar preview"
                     >
                         ↻
                     </button>
@@ -397,10 +421,20 @@
                         📥 Importar proyecto
                     </button>
 
+                    <!-- ZIP -->
+                    <input
+                        id="projectZipInput"
+                        type="file"
+                        accept=".zip,application/zip"
+                        hidden
+                    >
+
+                    <!-- CARPETA -->
                     <input
                         id="projectFolderInput"
                         type="file"
                         webkitdirectory
+                        directory
                         multiple
                         hidden
                     >
@@ -477,7 +511,7 @@
                             id="saveFile"
                             type="button"
                         >
-                            Guardar
+                            Guardar archivo
                         </button>
 
                     </div>
@@ -501,6 +535,15 @@
 
 </div>
 
+
+<!--
+    JSZip permite importar proyectos ZIP directamente
+    desde el navegador.
+    El ZIP no se envía al backend.
+-->
+<script
+    src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+></script>
 
 <script src="script.js"></script>
 
