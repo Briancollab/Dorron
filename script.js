@@ -67,8 +67,11 @@ const LANGUAGE_BY_EXTENSION = {
 // ============================================================
 
 let projectFiles = {};
+let projectFolders = new Set();
+
 let proyectoCreado = false;
 let archivoActual = null;
+let carpetaActual = "";
 
 
 // ============================================================
@@ -104,7 +107,8 @@ function limpiarRuta(ruta) {
         .replace(/^\/+/, "")
         .replace(/\/+/g, "/")
         .replace(/\.\./g, "")
-        .replace(/^~/, "");
+        .replace(/^~/, "")
+        .replace(/\/+$/, "");
 }
 
 
@@ -162,6 +166,54 @@ function iconoArchivo(ruta) {
 }
 
 
+function obtenerPadre(ruta) {
+    const partes = ruta.split("/");
+
+    if (partes.length <= 1) {
+        return "";
+    }
+
+    partes.pop();
+
+    return partes.join("/");
+}
+
+
+function asegurarCarpetasPadre(ruta) {
+    const partes = ruta.split("/");
+
+    if (partes.length <= 1) {
+        return;
+    }
+
+    partes.pop();
+
+    let actual = "";
+
+    partes.forEach(parte => {
+
+        actual = actual
+            ? `${actual}/${parte}`
+            : parte;
+
+        projectFolders.add(actual);
+    });
+}
+
+
+function existeArchivo(ruta) {
+    return Object.prototype.hasOwnProperty.call(
+        projectFiles,
+        ruta
+    );
+}
+
+
+function existeCarpeta(ruta) {
+    return projectFolders.has(ruta);
+}
+
+
 // ============================================================
 // BUILDER MODE
 // ============================================================
@@ -184,7 +236,8 @@ function añadirMensajeUsuario(texto) {
         return;
     }
 
-    const mensaje = document.createElement("div");
+    const mensaje =
+        document.createElement("div");
 
     mensaje.className =
         "chat-message user-message";
@@ -269,7 +322,7 @@ function actualizarMensajeIA(elemento, texto) {
 // FILE TREE
 // ============================================================
 
-function construirArbol(rutas) {
+function construirArbol() {
 
     const raiz = {
         tipo: "folder",
@@ -278,46 +331,116 @@ function construirArbol(rutas) {
         hijos: {}
     };
 
-    rutas.forEach(ruta => {
 
-        const partes =
-            ruta.split("/").filter(Boolean);
+    // --------------------------------------------------------
+    // CARPETAS
+    // --------------------------------------------------------
 
-        let actual = raiz;
+    Array.from(projectFolders)
+        .filter(Boolean)
+        .forEach(ruta => {
 
-        partes.forEach(
-            (parte, index) => {
+            const partes =
+                ruta.split("/").filter(Boolean);
 
-                const esArchivo =
-                    index === partes.length - 1;
+            let actual = raiz;
 
-                if (!actual.hijos[parte]) {
+            partes.forEach(
+                (parte, index) => {
 
-                    actual.hijos[parte] = {
+                    const rutaParcial =
+                        partes
+                            .slice(
+                                0,
+                                index + 1
+                            )
+                            .join("/");
 
-                        tipo: esArchivo
-                            ? "file"
-                            : "folder",
+                    if (!actual.hijos[parte]) {
 
-                        nombre: parte,
+                        actual.hijos[parte] = {
 
-                        ruta:
-                            partes
-                                .slice(
-                                    0,
-                                    index + 1
-                                )
-                                .join("/"),
+                            tipo: "folder",
 
-                        hijos: {}
-                    };
+                            nombre: parte,
+
+                            ruta: rutaParcial,
+
+                            hijos: {}
+                        };
+                    }
+
+                    actual =
+                        actual.hijos[parte];
                 }
+            );
+        });
 
-                actual =
-                    actual.hijos[parte];
-            }
-        );
-    });
+
+    // --------------------------------------------------------
+    // ARCHIVOS
+    // --------------------------------------------------------
+
+    Object.keys(projectFiles)
+        .filter(Boolean)
+        .forEach(ruta => {
+
+            const partes =
+                ruta.split("/").filter(Boolean);
+
+            let actual = raiz;
+
+            partes.forEach(
+                (parte, index) => {
+
+                    const esArchivo =
+                        index === partes.length - 1;
+
+                    const rutaParcial =
+                        partes
+                            .slice(
+                                0,
+                                index + 1
+                            )
+                            .join("/");
+
+
+                    if (!actual.hijos[parte]) {
+
+                        actual.hijos[parte] = {
+
+                            tipo:
+                                esArchivo
+                                    ? "file"
+                                    : "folder",
+
+                            nombre: parte,
+
+                            ruta:
+                                rutaParcial,
+
+                            hijos: {}
+                        };
+                    }
+
+
+                    if (
+                        !esArchivo &&
+                        actual.hijos[parte].tipo !==
+                            "folder"
+                    ) {
+
+                        actual.hijos[parte].tipo =
+                            "folder";
+                    }
+
+
+                    actual =
+                        actual.hijos[parte];
+                }
+            );
+        });
+
 
     return raiz;
 }
@@ -331,19 +454,18 @@ function renderizarArbolArchivos() {
 
     fileTree.innerHTML = "";
 
-    const rutas =
-        Object.keys(projectFiles)
-            .filter(
-                ruta =>
-                    ruta &&
-                    !ruta.endsWith("/")
-            )
-            .sort(
-                (a, b) =>
-                    a.localeCompare(b)
-            );
 
-    if (rutas.length === 0) {
+    const tieneArchivos =
+        Object.keys(projectFiles).length > 0;
+
+    const tieneCarpetas =
+        projectFolders.size > 0;
+
+
+    if (
+        !tieneArchivos &&
+        !tieneCarpetas
+    ) {
 
         fileTree.innerHTML = `
             <div class="empty-file-tree">
@@ -354,8 +476,10 @@ function renderizarArbolArchivos() {
         return;
     }
 
+
     const arbol =
-        construirArbol(rutas);
+        construirArbol();
+
 
     renderizarCarpeta(
         arbol,
@@ -395,9 +519,9 @@ function renderizarCarpeta(
 
     elementos.forEach(elemento => {
 
-        // ----------------------------------------------------
+        // ====================================================
         // FOLDER
-        // ----------------------------------------------------
+        // ====================================================
 
         if (elemento.tipo === "folder") {
 
@@ -413,6 +537,17 @@ function renderizarCarpeta(
 
             contenidoCarpeta.className =
                 "folder-content";
+
+
+            if (
+                elemento.ruta ===
+                carpetaActual
+            ) {
+                contenidoCarpeta.classList.add(
+                    "active"
+                );
+            }
+
 
             contenidoCarpeta.innerHTML = `
                 <span class="folder-arrow">
@@ -460,6 +595,53 @@ function renderizarCarpeta(
 
                     event.stopPropagation();
 
+                    carpetaActual =
+                        elemento.ruta;
+
+                    renderizarArbolArchivos();
+                }
+            );
+
+
+            contenidoCarpeta.addEventListener(
+                "dblclick",
+                event => {
+
+                    event.stopPropagation();
+
+                    renombrarCarpeta(
+                        elemento.ruta
+                    );
+                }
+            );
+
+
+            contenidoCarpeta.addEventListener(
+                "contextmenu",
+                event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    mostrarMenuCarpeta(
+                        elemento.ruta,
+                        event.clientX,
+                        event.clientY
+                    );
+                }
+            );
+
+
+            renderizarCarpeta(
+                elemento,
+                hijos
+            );
+
+
+            contenidoCarpeta.addEventListener(
+                "click",
+                () => {
+
                     abierta = !abierta;
 
                     hijos.style.display =
@@ -484,18 +666,13 @@ function renderizarCarpeta(
             );
 
 
-            renderizarCarpeta(
-                elemento,
-                hijos
-            );
-
             return;
         }
 
 
-        // ----------------------------------------------------
+        // ====================================================
         // FILE
-        // ----------------------------------------------------
+        // ====================================================
 
         const item =
             document.createElement("div");
@@ -551,8 +728,263 @@ function renderizarCarpeta(
         );
 
 
+        item.addEventListener(
+            "dblclick",
+            event => {
+
+                event.stopPropagation();
+
+                renombrarArchivo(
+                    elemento.ruta
+                );
+            }
+        );
+
+
+        item.addEventListener(
+            "contextmenu",
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                mostrarMenuArchivo(
+                    elemento.ruta,
+                    event.clientX,
+                    event.clientY
+                );
+            }
+        );
+
+
         contenedor.appendChild(item);
     });
+}
+
+
+// ============================================================
+// CONTEXT MENU
+// ============================================================
+
+function eliminarMenuContextual() {
+
+    const menu =
+        document.getElementById(
+            "dorron-context-menu"
+        );
+
+    if (menu) {
+        menu.remove();
+    }
+}
+
+
+function crearMenuContextual(
+    x,
+    y,
+    opciones
+) {
+
+    eliminarMenuContextual();
+
+
+    const menu =
+        document.createElement("div");
+
+    menu.id =
+        "dorron-context-menu";
+
+
+    menu.style.position =
+        "fixed";
+
+    menu.style.left =
+        `${x}px`;
+
+    menu.style.top =
+        `${y}px`;
+
+    menu.style.zIndex =
+        "99999";
+
+    menu.style.background =
+        "#11141a";
+
+    menu.style.border =
+        "1px solid #292e38";
+
+    menu.style.borderRadius =
+        "8px";
+
+    menu.style.padding =
+        "5px";
+
+    menu.style.minWidth =
+        "150px";
+
+    menu.style.boxShadow =
+        "0 12px 30px rgba(0,0,0,.45)";
+
+
+    opciones.forEach(opcion => {
+
+        const button =
+            document.createElement("button");
+
+        button.type =
+            "button";
+
+        button.textContent =
+            opcion.label;
+
+
+        button.style.display =
+            "block";
+
+        button.style.width =
+            "100%";
+
+        button.style.border =
+            "0";
+
+        button.style.background =
+            "transparent";
+
+        button.style.color =
+            opcion.danger
+                ? "#ff6b6b"
+                : "#dfe3ea";
+
+        button.style.textAlign =
+            "left";
+
+        button.style.padding =
+            "8px 10px";
+
+        button.style.borderRadius =
+            "6px";
+
+        button.style.cursor =
+            "pointer";
+
+
+        button.addEventListener(
+            "mouseenter",
+            () => {
+
+                button.style.background =
+                    "#1b2028";
+            }
+        );
+
+
+        button.addEventListener(
+            "mouseleave",
+            () => {
+
+                button.style.background =
+                    "transparent";
+            }
+        );
+
+
+        button.addEventListener(
+            "click",
+            event => {
+
+                event.stopPropagation();
+
+                eliminarMenuContextual();
+
+                opcion.action();
+            }
+        );
+
+
+        menu.appendChild(button);
+    });
+
+
+    document.body.appendChild(menu);
+
+
+    setTimeout(() => {
+
+        document.addEventListener(
+            "click",
+            eliminarMenuContextual,
+            {
+                once: true
+            }
+        );
+
+    }, 0);
+}
+
+
+function mostrarMenuArchivo(
+    ruta,
+    x,
+    y
+) {
+
+    crearMenuContextual(
+        x,
+        y,
+        [
+            {
+                label: "✏️ Renombrar",
+                action: () =>
+                    renombrarArchivo(ruta)
+            },
+
+            {
+                label: "🗑️ Eliminar",
+                danger: true,
+                action: () =>
+                    eliminarArchivo(ruta)
+            }
+        ]
+    );
+}
+
+
+function mostrarMenuCarpeta(
+    ruta,
+    x,
+    y
+) {
+
+    crearMenuContextual(
+        x,
+        y,
+        [
+            {
+                label: "📄 Nuevo archivo",
+                action: () =>
+                    crearArchivo(ruta)
+            },
+
+            {
+                label: "📁 Nueva subcarpeta",
+                action: () =>
+                    crearCarpeta(ruta)
+            },
+
+            {
+                label: "✏️ Renombrar",
+                action: () =>
+                    renombrarCarpeta(ruta)
+            },
+
+            {
+                label: "🗑️ Eliminar carpeta",
+                danger: true,
+                action: () =>
+                    eliminarCarpeta(ruta)
+            }
+        ]
+    );
 }
 
 
@@ -562,506 +994,17 @@ function renderizarCarpeta(
 
 function seleccionarArchivo(ruta) {
 
-    if (
-        !Object.prototype.hasOwnProperty.call(
-            projectFiles,
-            ruta
-        )
-    ) {
+    if (!existeArchivo(ruta)) {
         return;
     }
+
 
     guardarArchivoActual();
 
-    archivoActual = ruta;
 
+    archivoActual =
+        ruta;
 
-    if (codeEditor) {
 
-        codeEditor.value =
-            projectFiles[ruta] || "";
-    }
-
-
-    if (editorLanguage) {
-
-        editorLanguage.textContent =
-            detectarLenguaje(ruta);
-    }
-
-
-    if (editorPath) {
-
-        editorPath.textContent =
-            ruta;
-    }
-
-
-    if (activeFileTab) {
-
-        const nombre =
-            ruta.split("/").pop();
-
-        activeFileTab.innerHTML = `
-            <span class="file-icon">
-                ${escaparHTML(
-                    iconoArchivo(ruta)
-                )}
-            </span>
-
-            <span>
-                ${escaparHTML(nombre)}
-            </span>
-        `;
-    }
-
-
-    document
-        .querySelectorAll(".file-item")
-        .forEach(item => {
-
-            item.classList.toggle(
-                "active",
-                item.dataset.path === ruta
-            );
-        });
-}
-
-
-// ============================================================
-// SAVE CURRENT FILE
-// ============================================================
-
-function guardarArchivoActual() {
-
-    if (
-        !archivoActual ||
-        !codeEditor
-    ) {
-        return;
-    }
-
-    projectFiles[archivoActual] =
-        codeEditor.value;
-}
-
-
-// ============================================================
-// OPEN / CLOSE CODE
-// ============================================================
-
-function abrirCodigo() {
-
-    if (!codeView) {
-        return;
-    }
-
-    guardarArchivoActual();
-
-    codeView.classList.add("open");
-
-    codeView.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-    renderizarArbolArchivos();
-
-
-    const rutas =
-        Object.keys(projectFiles);
-
-
-    if (!archivoActual && rutas.length) {
-
-        seleccionarArchivo(
-            rutas[0]
-        );
-
-    } else if (archivoActual) {
-
-        seleccionarArchivo(
-            archivoActual
-        );
-    }
-}
-
-
-function cerrarCodigo() {
-
-    guardarArchivoActual();
-
-    if (!codeView) {
-        return;
-    }
-
-    codeView.classList.remove(
-        "open"
-    );
-
-    codeView.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-}
-
-
-// ============================================================
-// CREATE FILE
-// ============================================================
-
-function crearArchivo() {
-
-    const rutaIntroducida =
-        prompt(
-            "Ruta del nuevo archivo:",
-            "src/App.jsx"
-        );
-
-    if (!rutaIntroducida) {
-        return;
-    }
-
-
-    const ruta =
-        limpiarRuta(
-            rutaIntroducida
-        );
-
-
-    if (!ruta) {
-
-        alert(
-            "La ruta no es válida."
-        );
-
-        return;
-    }
-
-
-    if (
-        Object.prototype.hasOwnProperty.call(
-            projectFiles,
-            ruta
-        )
-    ) {
-
-        alert(
-            "Ese archivo ya existe."
-        );
-
-        return;
-    }
-
-
-    projectFiles[ruta] = "";
-
-
-    renderizarArbolArchivos();
-
-    seleccionarArchivo(ruta);
-}
-
-
-// ============================================================
-// CREATE FOLDER
-// ============================================================
-
-function crearCarpeta() {
-
-    const carpetaIntroducida =
-        prompt(
-            "Ruta de la nueva carpeta:",
-            "src/components"
-        );
-
-    if (!carpetaIntroducida) {
-        return;
-    }
-
-
-    const carpeta =
-        limpiarRuta(
-            carpetaIntroducida
-        );
-
-
-    if (!carpeta) {
-
-        alert(
-            "El nombre de la carpeta no es válido."
-        );
-
-        return;
-    }
-
-
-    /*
-     * Como el sistema actual almacena archivos
-     * mediante rutas, creamos un archivo inicial
-     * para que la carpeta exista.
-     */
-
-    const archivoInicial =
-        `${carpeta}/index.html`;
-
-
-    if (
-        !Object.prototype.hasOwnProperty.call(
-            projectFiles,
-            archivoInicial
-        )
-    ) {
-
-        projectFiles[
-            archivoInicial
-        ] = "";
-    }
-
-
-    renderizarArbolArchivos();
-
-    seleccionarArchivo(
-        archivoInicial
-    );
-}
-
-
-// ============================================================
-// EDITOR INPUT
-// ============================================================
-
-if (codeEditor) {
-
-    codeEditor.addEventListener(
-        "input",
-        () => {
-
-            if (!archivoActual) {
-                return;
-            }
-
-            projectFiles[
-                archivoActual
-            ] = codeEditor.value;
-        }
-    );
-}
-
-
-// ============================================================
-// CODE BUTTONS
-// ============================================================
-
-if (codeTool) {
-
-    codeTool.addEventListener(
-        "click",
-        abrirCodigo
-    );
-
-
-    codeTool.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
-
-                event.preventDefault();
-
-                abrirCodigo();
-            }
-        }
-    );
-}
-
-
-if (closeCode) {
-
-    closeCode.addEventListener(
-        "click",
-        cerrarCodigo
-    );
-}
-
-
-if (newFileButton) {
-
-    newFileButton.addEventListener(
-        "click",
-        crearArchivo
-    );
-}
-
-
-if (newFolderButton) {
-
-    newFolderButton.addEventListener(
-        "click",
-        crearCarpeta
-    );
-}
-
-
-// ============================================================
-// SAVE FILES FROM GEMINI
-// ============================================================
-
-function guardarArchivos(files) {
-
-    if (!Array.isArray(files)) {
-        return;
-    }
-
-
-    files.forEach(file => {
-
-        if (
-            !file ||
-            !file.path
-        ) {
-            return;
-        }
-
-
-        const ruta =
-            limpiarRuta(
-                file.path
-            );
-
-
-        if (!ruta) {
-            return;
-        }
-
-
-        // DELETE
-
-        if (
-            file.operation ===
-            "delete"
-        ) {
-
-            delete projectFiles[ruta];
-
-
-            if (
-                archivoActual ===
-                ruta
-            ) {
-                archivoActual = null;
-            }
-
-
-            return;
-        }
-
-
-        // CREATE / UPDATE
-
-        if (
-            file.operation === "create" ||
-            file.operation === "update"
-        ) {
-
-            projectFiles[ruta] =
-                typeof file.content ===
-                "string"
-                    ? file.content
-                    : "";
-        }
-    });
-
-
-    if (
-        Object.keys(projectFiles)
-            .length > 0
-    ) {
-
-        proyectoCreado = true;
-    }
-
-
-    renderizarArbolArchivos();
-
-
-    if (
-        !archivoActual &&
-        projectFiles["index.html"]
-    ) {
-
-        seleccionarArchivo(
-            "index.html"
-        );
-    }
-}
-
-
-// ============================================================
-// SEND PROJECT TO GEMINI
-// ============================================================
-
-function obtenerArchivosParaGemini() {
-
-    guardarArchivoActual();
-
-    return {
-        ...projectFiles
-    };
-}
-
-
-// ============================================================
-// BUILD PREVIEW
-// ============================================================
-
-function construirPreview(files) {
-
-    if (!Array.isArray(files)) {
-        return "";
-    }
-
-
-    const indexFile =
-        files.find(
-            file =>
-                file &&
-                file.path ===
-                    "index.html" &&
-                typeof file.content ===
-                    "string"
-        );
-
-
-    if (!indexFile) {
-        return "";
-    }
-
-
-    let html =
-        indexFile.content;
-
-
-    // --------------------------------------------------------
-    // CSS
-    // --------------------------------------------------------
-
-    const cssFiles =
-        files.filter(
-            file =>
-                file &&
-                typeof file.content ===
-                    "string" &&
-                /\.css$/i.test(
-                    file.path
-                )
-        );
-
-
-    if (cssFiles.length > 0) {
-
-        const css =
-                        
+    carpetaActual =
+        obtenerPadre(ru
