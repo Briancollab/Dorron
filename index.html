@@ -14,303 +14,495 @@
 </head>
 
 <body>
-    <div class="app">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
+<div class="app">
 
-            <div class="brand">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">D</div>
+
+            <div>
+                <strong>Dorrón</strong>
+                <span>IA Website Builder</span>
+            </div>
+        </div>
+
+        <button
+            class="new-project"
+            id="newProject"
+            type="button"
+        >
+            <span>＋</span>
+            Nuevo proyecto
+        </button>
+
+        <div class="sidebar-section">
+
+            <span class="section-title">PROYECTO</span>
+
+            <div class="project-item active">
+                <span class="project-dot"></span>
+                <span>Mi proyecto</span>
+            </div>
+
+        </div>
+
+        <div class="sidebar-section">
+
+            <span class="section-title">HERRAMIENTAS</span>
+
+            <div class="tool-item active-tool" id="aiTool">
+                <span>✦</span>
+                Dorrón IA
+            </div>
+
+            <div class="tool-item" id="previewTool">
+                <span>◫</span>
+                Preview
+            </div>
+
+            <div
+                class="tool-item"
+                id="codeTool"
+                role="button"
+                tabindex="0"
+            >
+                <span>⌘</span>
+                Código
+            </div>
+
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Dorrón IA conectado
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div class="mobile-brand">
                 <div class="brand-icon">D</div>
-                <div>
-                    <strong>Dorrón</strong>
-                    <span>IA Website Builder</span>
-                </div>
+                <strong>Dorrón</strong>
             </div>
 
-            <button class="new-project" type="button" onclick="location.reload()">
-                <span>＋</span>
-                Nuevo proyecto
-            </button>
-
-            <div class="sidebar-section">
-                <span class="section-title">PROYECTO</span>
-
-                <div class="project-item active">
-                    <span class="project-dot"></span>
-                    <span>Mi proyecto</span>
-                </div>
+            <div class="project-name">
+                <span class="live-dot"></span>
+                Proyecto sin título
             </div>
 
-            <div class="sidebar-section">
-                <span class="section-title">HERRAMIENTAS</span>
+            <div class="top-actions">
 
-                <div class="tool-item">
-                    <span>✦</span>
-                    Dorrón IA
-                </div>
+                <button
+                    class="top-button"
+                    type="button"
+                >
+                    ↗ <span>Compartir</span>
+                </button>
 
-                <div class="tool-item">
-                    <span>◫</span>
-                    Preview
-                </div>
+                <button
+                    class="publish-button"
+                    type="button"
+                >
+                    Publicar
+                </button>
+
             </div>
 
-            <div class="sidebar-bottom">
-                <div class="status">
-                    <span class="status-dot"></span>
-                    Dorrón IA conectado
-                </div>
-            </div>
+        </header>
 
-        </aside>
 
-        <!-- MAIN -->
-        <main class="main">
+        <!-- WORKSPACE -->
+        <section class="workspace">
 
-            <!-- TOP BAR -->
-            <header class="topbar">
+            <!-- PREVIEW -->
+            <div class="preview-area">
 
-                <div class="mobile-brand">
-                    <div class="brand-icon">D</div>
-                    <strong>Dorrón</strong>
-                </div>
+                <div class="preview-toolbar">
 
-                <div class="project-name">
-                    <span class="live-dot"></span>
-                    Proyecto sin título
-                </div>
+                    <div class="preview-title">
+                        <span class="preview-icon">◉</span>
+                        Vista previa
+                    </div>
 
-                <div class="top-actions">
-                    <button class="top-button" type="button">
-                        ↗ <span>Compartir</span>
-                    </button>
+                    <div class="device-controls">
 
-                    <button class="publish-button" type="button">
-                        Publicar
-                    </button>
-                </div>
+                        <button
+                            class="device active"
+                            type="button"
+                            data-device="desktop"
+                        >
+                            ▣
+                        </button>
 
-            </header>
+                        <button
+                            class="device"
+                            type="button"
+                            data-device="tablet"
+                        >
+                            ▯
+                        </button>
 
-            <!-- WORKSPACE -->
-            <section class="workspace">
-
-                <!-- PREVIEW -->
-                <div class="preview-area">
-
-                    <div class="preview-toolbar">
-
-                        <div class="preview-title">
-                            <span class="preview-icon">◉</span>
-                            Vista previa
-                        </div>
-
-                        <div class="device-controls">
-                            <button class="device active" type="button">▣</button>
-                            <button class="device" type="button">▯</button>
-                            <button class="device" type="button">▥</button>
-                        </div>
-
-                        <button class="refresh-preview" type="button"
-                            onclick="document.getElementById('webPreview').contentWindow.location.reload()">
-                            ↻
+                        <button
+                            class="device"
+                            type="button"
+                            data-device="mobile"
+                        >
+                            ▥
                         </button>
 
                     </div>
 
-                    <div class="preview-container">
+                    <button
+                        class="refresh-preview"
+                        id="refreshPreview"
+                        type="button"
+                    >
+                        ↻
+                    </button>
 
-                        <div id="empty-preview" class="empty-preview">
+                </div>
 
-                            <div class="empty-icon">
-                                ✦
-                            </div>
 
-                            <h2>Tu web aparecerá aquí</h2>
+                <div class="preview-container">
 
-                            <p>
-                                Describe lo que quieres crear y Dorrón IA
-                                construirá tu página.
+                    <div
+                        id="empty-preview"
+                        class="empty-preview"
+                    >
+
+                        <div class="empty-icon">
+                            ✦
+                        </div>
+
+                        <h2>Tu web aparecerá aquí</h2>
+
+                        <p>
+                            Describe lo que quieres crear y Dorrón IA
+                            construirá tu página.
+                        </p>
+
+                        <div class="example-prompts">
+                            <span>✨ Tienda online</span>
+                            <span>🚀 Landing page</span>
+                            <span>🎨 Portfolio</span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOADING -->
+                    <div
+                        id="loading"
+                        class="loading"
+                    >
+
+                        <div class="loading-card">
+
+                            <div class="loader"></div>
+
+                            <h3>
+                                Dorrón está creando tu web...
+                            </h3>
+
+                            <p id="estado">
+                                Analizando tu petición...
                             </p>
 
-                            <div class="example-prompts">
-                                <span>✨ Tienda online</span>
-                                <span>🚀 Landing page</span>
-                                <span>🎨 Portfolio</span>
+                            <div class="loading-bar">
+                                <div></div>
                             </div>
 
                         </div>
 
-                        <!-- LOADING -->
-                        <div id="loading" class="loading">
+                    </div>
 
-                            <div class="loading-card">
 
-                                <div class="loader"></div>
+                    <!-- RESULTADO -->
+                    <div
+                        id="resultado"
+                        class="resultado"
+                    >
 
-                                <h3>Dorrón está creando tu web...</h3>
-
-                                <p id="estado">
-                                    Analizando tu petición...
-                                </p>
-
-                                <div class="loading-bar">
-                                    <div></div>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <!-- RESULTADO -->
-                        <div id="resultado" class="resultado">
-
-                            <iframe
-                                id="webPreview"
-                                title="Vista previa de la web generada"
-                                sandbox="allow-scripts allow-forms allow-modals allow-popups"
-                            ></iframe>
-
-                        </div>
+                        <iframe
+                            id="webPreview"
+                            title="Vista previa de la web generada"
+                            sandbox="allow-scripts allow-forms allow-modals allow-popups"
+                        ></iframe>
 
                     </div>
 
                 </div>
 
-                <!-- AI PANEL -->
-                <aside class="ai-panel">
+            </div>
 
-                    <div class="ai-header">
 
-                        <div class="ai-title">
+            <!-- AI PANEL -->
+            <aside class="ai-panel">
 
-                            <div class="ai-avatar">✦</div>
+                <div class="ai-header">
 
-                            <div>
-                                <strong>Dorrón IA</strong>
-                                <span>Crea con lenguaje natural</span>
-                            </div>
+                    <div class="ai-title">
+
+                        <div class="ai-avatar">
+                            ✦
+                        </div>
+
+                        <div>
+                            <strong>Dorrón IA</strong>
+                            <span>Crea con lenguaje natural</span>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="more-button"
+                        type="button"
+                    >
+                        ⋯
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="conversation"
+                    id="conversation"
+                >
+
+                    <div class="welcome-message">
+
+                        <div class="message-avatar">
+                            D
+                        </div>
+
+                        <div class="message-content">
+
+                            <strong>Hola 👋</strong>
+
+                            <p>
+                                Dime qué página quieres crear y me
+                                encargo del código y del diseño.
+                            </p>
 
                         </div>
 
-                        <button class="more-button" type="button">
-                            ⋯
+                    </div>
+
+
+                    <div class="suggestions">
+
+                        <button
+                            type="button"
+                            data-prompt="Crea una tienda online moderna de tecnología con fondo oscuro, gradientes azules, productos, precios y formulario de contacto."
+                        >
+                            <span>🛍️</span>
+                            Crear una tienda online
+                        </button>
+
+                        <button
+                            type="button"
+                            data-prompt="Crea una landing page moderna para una aplicación tecnológica, con un hero espectacular, botones, características y animaciones."
+                        >
+                            <span>🚀</span>
+                            Crear una landing page
+                        </button>
+
+                        <button
+                            type="button"
+                            data-prompt="Crea un portfolio profesional moderno con proyectos, presentación personal, habilidades y formulario de contacto."
+                        >
+                            <span>🎨</span>
+                            Crear un portfolio
                         </button>
 
                     </div>
 
-                    <div class="conversation">
+                </div>
 
-                        <div class="welcome-message">
 
-                            <div class="message-avatar">
-                                D
-                            </div>
+                <div class="prompt-area">
 
-                            <div class="message-content">
+                    <div class="prompt-box">
 
-                                <strong>Hola 👋</strong>
+                        <textarea
+                            id="peticion"
+                            rows="4"
+                            placeholder="Describe qué quieres crear o modificar..."
+                            autocomplete="off"
+                        ></textarea>
 
-                                <p>
-                                    Dime qué página quieres crear y me
-                                    encargo del código y del diseño.
-                                </p>
+                        <div class="prompt-footer">
 
-                            </div>
+                            <span class="prompt-hint">
+                                Dorrón puede crear y modificar tu web
+                            </span>
 
-                        </div>
-
-                        <div class="suggestions">
-
-                            <button type="button"
-                                onclick="document.getElementById('peticion').value='Crea una tienda online moderna de tecnología con fondo oscuro, gradientes azules, productos, precios y formulario de contacto.'">
-                                <span>🛍️</span>
-                                Crear una tienda online
-                            </button>
-
-                            <button type="button"
-                                onclick="document.getElementById('peticion').value='Crea una landing page moderna para una aplicación tecnológica, con un hero espectacular, botones, características y animaciones.'">
-                                <span>🚀</span>
-                                Crear una landing page
-                            </button>
-
-                            <button type="button"
-                                onclick="document.getElementById('peticion').value='Crea un portfolio profesional moderno con proyectos, presentación personal, habilidades y formulario de contacto.'">
-                                <span>🎨</span>
-                                Crear un portfolio
+                            <button
+                                id="generar"
+                                class="generate-button"
+                                type="button"
+                            >
+                                <span>Generar</span>
+                                <span>↑</span>
                             </button>
 
                         </div>
 
                     </div>
 
-                    <div class="prompt-area">
-
-                        <div class="prompt-box">
-
-                            <textarea
-                                id="peticion"
-                                rows="4"
-                                placeholder="Describe qué quieres crear o modificar..."
-                                autocomplete="off"
-                            ></textarea>
-
-                            <div class="prompt-footer">
-
-                                <span class="prompt-hint">
-                                    Dorrón puede crear y modificar tu web
-                                </span>
-
-                                <button
-                                    id="generar"
-                                    class="generate-button"
-                                    type="button"
-                                >
-                                    <span>Generar</span>
-                                    <span>↑</span>
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                        <div class="ai-disclaimer">
-                            Dorrón IA puede cometer errores. Revisa el resultado antes de publicar.
-                        </div>
-
+                    <div class="ai-disclaimer">
+                        Dorrón IA puede cometer errores. Revisa el resultado antes de publicar.
                     </div>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+
+        <!-- CODE VIEW -->
+        <section
+            id="codeView"
+            class="code-view"
+            aria-hidden="true"
+        >
+
+            <div class="code-header">
+
+                <div class="code-title">
+                    <span>⌘</span>
+                    <strong>Código</strong>
+                </div>
+
+                <div class="code-actions">
+
+                    <button
+                        id="importProject"
+                        type="button"
+                    >
+                        📥 Importar proyecto
+                    </button>
+
+                    <input
+                        id="projectFolderInput"
+                        type="file"
+                        webkitdirectory
+                        multiple
+                        hidden
+                    >
+
+                    <button
+                        id="newFolder"
+                        type="button"
+                    >
+                        ＋ Carpeta
+                    </button>
+
+                    <button
+                        id="newFile"
+                        type="button"
+                    >
+                        ＋ Archivo
+                    </button>
+
+                    <button
+                        id="closeCode"
+                        type="button"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="code-workspace">
+
+                <!-- FILE EXPLORER -->
+                <aside class="file-explorer">
+
+                    <div class="explorer-header">
+                        <span>ARCHIVOS</span>
+                    </div>
+
+                    <div
+                        id="fileTree"
+                        class="file-tree"
+                    ></div>
 
                 </aside>
 
-            </section>
 
-        </main>
+                <!-- EDITOR -->
+                <div class="code-editor">
 
-    </div>
+                    <div class="editor-tabs">
 
-    <script>
-        /*
-         * Estado inicial de la interfaz.
-         * No sustituye al script.js principal.
-         */
-        const emptyPreview = document.getElementById("empty-preview");
+                        <div
+                            id="activeFileTab"
+                            class="editor-tab"
+                        >
+                            <span class="file-icon html">◇</span>
+                            <span>Sin archivo</span>
+                        </div>
 
-        const observer = new MutationObserver(() => {
-            const resultado = document.getElementById("resultado");
+                    </div>
 
-            if (resultado && resultado.style.display !== "none") {
-                emptyPreview.style.display = "none";
-            }
-        });
+                    <div class="editor-toolbar">
 
-        observer.observe(document.body, {
-            attributes: true,
-            subtree: true,
-            attributeFilter: ["style"]
-        });
-    </script>
+                        <span id="editorLanguage">
+                            —
+                        </span>
 
-    <script src="script.js"></script>
+                        <span id="editorPath">
+                            —
+                        </span>
+
+                        <button
+                            id="saveFile"
+                            type="button"
+                        >
+                            Guardar
+                        </button>
+
+                    </div>
+
+                    <textarea
+                        id="codeEditor"
+                        spellcheck="false"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        placeholder="Selecciona un archivo..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
