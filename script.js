@@ -143,7 +143,6 @@ function generarId() {
             .toString(36)
             .slice(2, 8)
     );
-
 }
 
 
@@ -152,12 +151,11 @@ function limpiarRuta(ruta) {
     return String(ruta || "")
         .replace(/\\/g, "/")
         .replace(/^\/+/, "")
-        .replace(/\.\//g, "")
-        .replace(/\.\./g, "")
+        .replace(/^\.\//, "")
+        .replace(/\.\.\//g, "")
         .replace(/\/+/g, "/")
         .replace(/^\/|\/$/g, "")
         .trim();
-
 }
 
 
@@ -174,7 +172,8 @@ function nombreProyectoUnico(nombre) {
     while (
         projects.some(
             proyecto =>
-                proyecto.name.toLowerCase() ===
+                String(proyecto.name)
+                    .toLowerCase() ===
                 resultado.toLowerCase()
         )
     ) {
@@ -183,11 +182,9 @@ function nombreProyectoUnico(nombre) {
             `${base} ${numero}`;
 
         numero++;
-
     }
 
     return resultado;
-
 }
 
 
@@ -195,9 +192,67 @@ function obtenerProyectoActual() {
 
     return projects.find(
         proyecto =>
-            proyecto.id === currentProjectId
+            proyecto.id ===
+            currentProjectId
+    );
+}
+
+
+function agregarMensajeIA(texto) {
+
+    if (!conversation) return;
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "ai-message";
+
+    wrapper.style.cssText = `
+        display:flex;
+        gap:10px;
+        margin-top:16px;
+    `;
+
+    const avatar =
+        document.createElement("div");
+
+    avatar.className =
+        "message-avatar";
+
+    avatar.textContent =
+        "D";
+
+    const contenido =
+        document.createElement("div");
+
+    contenido.className =
+        "message-content";
+
+    const textoElemento =
+        document.createElement("p");
+
+    textoElemento.textContent =
+        texto;
+
+    contenido.appendChild(
+        textoElemento
     );
 
+    wrapper.appendChild(
+        avatar
+    );
+
+    wrapper.appendChild(
+        contenido
+    );
+
+    conversation.appendChild(
+        wrapper
+    );
+
+    conversation.scrollTop =
+        conversation.scrollHeight;
 }
 
 
@@ -235,34 +290,36 @@ function cargarProyectos() {
         }
 
         projects =
-            datos.map(proyecto => ({
+            datos.map(
+                proyecto => ({
 
-                id:
-                    proyecto.id ||
-                    generarId(),
+                    id:
+                        proyecto.id ||
+                        generarId(),
 
-                name:
-                    proyecto.name ||
-                    "Mi proyecto",
+                    name:
+                        proyecto.name ||
+                        "Mi proyecto",
 
-                files:
-                    proyecto.files &&
-                    typeof proyecto.files === "object"
-                        ? proyecto.files
-                        : {},
+                    files:
+                        proyecto.files &&
+                        typeof proyecto.files === "object"
+                            ? proyecto.files
+                            : {},
 
-                folders:
-                    Array.isArray(
-                        proyecto.folders
-                    )
-                        ? proyecto.folders
-                        : [],
+                    folders:
+                        Array.isArray(
+                            proyecto.folders
+                        )
+                            ? proyecto.folders
+                            : [],
 
-                updatedAt:
-                    proyecto.updatedAt ||
-                    Date.now()
+                    updatedAt:
+                        proyecto.updatedAt ||
+                        Date.now()
 
-            }));
+                })
+            );
 
         const ultimo =
             localStorage.getItem(
@@ -272,7 +329,8 @@ function cargarProyectos() {
         const existeUltimo =
             projects.some(
                 proyecto =>
-                    proyecto.id === ultimo
+                    proyecto.id ===
+                    ultimo
             );
 
         currentProjectId =
@@ -290,9 +348,7 @@ function cargarProyectos() {
         );
 
         crearProyectoInicial();
-
     }
-
 }
 
 
@@ -324,9 +380,7 @@ function guardarProyectos() {
         );
 
         return false;
-
     }
-
 }
 
 
@@ -338,19 +392,24 @@ function crearProyectoInicial() {
 
     const proyecto = {
 
-        id: generarId(),
+        id:
+            generarId(),
 
-        name: "Mi proyecto",
+        name:
+            "Mi proyecto",
 
         files: {},
 
         folders: [],
 
-        updatedAt: Date.now()
+        updatedAt:
+            Date.now()
 
     };
 
-    projects = [proyecto];
+    projects = [
+        proyecto
+    ];
 
     currentProjectId =
         proyecto.id;
@@ -358,7 +417,6 @@ function crearProyectoInicial() {
     guardarProyectos();
 
     cargarProyectoActual();
-
 }
 
 
@@ -384,15 +442,19 @@ function cargarProyectoActual() {
             proyecto.folders || []
         );
 
-    archivoActual = null;
+    archivoActual =
+        null;
 
-    carpetaActual = "";
+    carpetaActual =
+        "";
 
     carpetasAbiertas =
         new Set();
 
     proyectoCreado =
-        Object.keys(projectFiles).length > 0 ||
+        Object.keys(
+            projectFiles
+        ).length > 0 ||
         projectFolders.size > 0;
 
     actualizarNombreProyecto();
@@ -404,7 +466,6 @@ function cargarProyectoActual() {
     limpiarEditor();
 
     cargarPreviewProyecto();
-
 }
 
 
@@ -413,25 +474,39 @@ function actualizarNombreProyecto() {
     const proyecto =
         obtenerProyectoActual();
 
-    if (!proyecto || !projectName) return;
+    if (
+        !proyecto ||
+        !projectName
+    ) {
+        return;
+    }
 
-    projectName.innerHTML = "";
+    projectName.innerHTML =
+        "";
 
     const punto =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
 
     punto.className =
         "live-dot";
 
     const nombre =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
 
     nombre.textContent =
         proyecto.name;
 
-    projectName.appendChild(punto);
-    projectName.appendChild(nombre);
+    projectName.appendChild(
+        punto
+    );
 
+    projectName.appendChild(
+        nombre
+    );
 }
 
 
@@ -455,7 +530,8 @@ function cambiarProyecto(id) {
 
     if (!existe) return;
 
-    currentProjectId = id;
+    currentProjectId =
+        id;
 
     localStorage.setItem(
         "dorron_current_project",
@@ -467,12 +543,11 @@ function cambiarProyecto(id) {
     agregarMensajeIA(
         `📂 Proyecto abierto: ${obtenerProyectoActual().name}`
     );
-
 }
 
 
 // ============================================================
-// GUARDAR ESTADO DEL PROYECTO
+// GUARDAR ESTADO
 // ============================================================
 
 function guardarEstadoProyectoActual() {
@@ -491,7 +566,6 @@ function guardarEstadoProyectoActual() {
 
     proyecto.updatedAt =
         Date.now();
-
 }
 
 
@@ -512,13 +586,14 @@ function guardarProyectoCompleto(
     ) {
 
         agregarMensajeIA(
-            `💾 Proyecto guardado: ${obtenerProyectoActual()?.name || "Proyecto"}`
+            `💾 Proyecto guardado: ${
+                obtenerProyectoActual()?.name ||
+                "Proyecto"
+            }`
         );
-
     }
 
     return guardado;
-
 }
 
 
@@ -530,12 +605,17 @@ function renderizarListaProyectos() {
 
     if (!projectList) return;
 
-    projectList.innerHTML = "";
+    projectList.innerHTML =
+        "";
 
-    for (const proyecto of projects) {
+    for (
+        const proyecto of projects
+    ) {
 
         const elemento =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         elemento.className =
             "project-item";
@@ -548,20 +628,23 @@ function renderizarListaProyectos() {
             elemento.classList.add(
                 "active"
             );
-
         }
 
         elemento.dataset.projectId =
             proyecto.id;
 
         const punto =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         punto.className =
             "project-dot";
 
         const nombre =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         nombre.className =
             "project-name-label";
@@ -569,26 +652,26 @@ function renderizarListaProyectos() {
         nombre.textContent =
             proyecto.name;
 
-        elemento.appendChild(punto);
-        elemento.appendChild(nombre);
+        elemento.appendChild(
+            punto
+        );
+
+        elemento.appendChild(
+            nombre
+        );
 
         elemento.addEventListener(
             "click",
-            () => {
-
+            () =>
                 cambiarProyecto(
                     proyecto.id
-                );
-
-            }
+                )
         );
 
         projectList.appendChild(
             elemento
         );
-
     }
-
 }
 
 
@@ -606,7 +689,9 @@ function crearNuevoProyecto() {
             ""
         );
 
-    if (nombre === null) return;
+    if (nombre === null) {
+        return;
+    }
 
     nombre =
         nombre.trim();
@@ -615,27 +700,33 @@ function crearNuevoProyecto() {
 
         nombre =
             `Proyecto ${projects.length + 1}`;
-
     }
 
     nombre =
-        nombreProyectoUnico(nombre);
+        nombreProyectoUnico(
+            nombre
+        );
 
     const proyecto = {
 
-        id: generarId(),
+        id:
+            generarId(),
 
-        name: nombre,
+        name:
+            nombre,
 
         files: {},
 
         folders: [],
 
-        updatedAt: Date.now()
+        updatedAt:
+            Date.now()
 
     };
 
-    projects.push(proyecto);
+    projects.push(
+        proyecto
+    );
 
     currentProjectId =
         proyecto.id;
@@ -647,7 +738,6 @@ function crearNuevoProyecto() {
     agregarMensajeIA(
         `✨ Nuevo proyecto creado: ${nombre}`
     );
-
 }
 
 
@@ -657,7 +747,6 @@ if (newProjectButton) {
         "click",
         crearNuevoProyecto
     );
-
 }
 
 
@@ -678,11 +767,18 @@ if (importProjectButton) {
 
                 projectZipInput.click();
 
+                return;
             }
 
+            if (projectFolderInput) {
+
+                projectFolderInput.value =
+                    "";
+
+                projectFolderInput.click();
+            }
         }
     );
-
 }
 
 
@@ -701,15 +797,22 @@ if (projectZipInput) {
 
             if (!archivo) return;
 
-            await importarZIP(archivo);
+            await importarZIP(
+                archivo
+            );
 
+            event.target.value =
+                "";
         }
     );
-
 }
 
 
 async function importarZIP(archivo) {
+
+    if (!archivo) {
+        return;
+    }
 
     if (
         typeof JSZip ===
@@ -721,7 +824,6 @@ async function importarZIP(archivo) {
         );
 
         return;
-
     }
 
     try {
@@ -741,58 +843,156 @@ async function importarZIP(archivo) {
             new Set();
 
         const entradas =
-            Object.values(zip.files);
+            Object.values(
+                zip.files
+            );
 
-        for (const entrada of entradas) {
+        if (!entradas.length) {
 
-            if (entrada.dir) {
+            alert(
+                "El ZIP está vacío."
+            );
 
-                const carpeta =
-                    limpiarRuta(
-                        entrada.name
-                    );
+            return;
+        }
 
-                if (carpeta) {
+        for (
+            const entrada of entradas
+        ) {
 
-                    folders.add(
-                        carpeta
-                    );
-
-                }
-
-                continue;
-            }
-
-            const ruta =
+            let ruta =
                 limpiarRuta(
                     entrada.name
                 );
 
-            if (!ruta) continue;
+            if (!ruta) {
+                continue;
+            }
 
-            const contenido =
-                await entrada.async(
-                    "string"
+            if (
+                ruta === ".." ||
+                ruta.startsWith("../") ||
+                ruta.includes("/../")
+            ) {
+
+                console.warn(
+                    "Ruta ZIP ignorada:",
+                    entrada.name
                 );
 
-            files[ruta] =
-                contenido;
+                continue;
+            }
+
+            if (entrada.dir) {
+
+                folders.add(
+                    ruta
+                );
+
+                continue;
+            }
+
+            /*
+             * Archivos de texto:
+             * HTML, CSS, JS, JSX, TS, TSX,
+             * JSON, Markdown, SVG, XML, etc.
+             */
+
+            const extension =
+                ruta
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+            const extensionesTexto = [
+                "html",
+                "htm",
+                "css",
+                "js",
+                "mjs",
+                "cjs",
+                "jsx",
+                "ts",
+                "tsx",
+                "json",
+                "md",
+                "markdown",
+                "svg",
+                "xml",
+                "xhtml",
+                "txt",
+                "map",
+                "webmanifest",
+                "yml",
+                "yaml",
+                "scss",
+                "sass",
+                "less"
+            ];
+
+            if (
+                extensionesTexto.includes(
+                    extension
+                )
+            ) {
+
+                files[ruta] =
+                    await entrada.async(
+                        "string"
+                    );
+
+            } else {
+
+                /*
+                 * Los archivos binarios se guardan
+                 * como Data URL para evitar convertirlos
+                 * incorrectamente a texto.
+                 */
+
+                files[ruta] =
+                    await entrada.async(
+                        "base64"
+                    );
+
+            }
 
             asegurarCarpetasPadreEnSet(
                 ruta,
                 folders
             );
-
         }
 
-        const nombreBase =
+        const cantidad =
+            Object.keys(
+                files
+            ).length;
+
+        if (cantidad === 0) {
+
+            alert(
+                "No se encontraron archivos válidos dentro del ZIP."
+            );
+
+            agregarMensajeIA(
+                "⚠️ El ZIP no contiene archivos importables."
+            );
+
+            return;
+        }
+
+        let nombreBase =
             archivo.name
                 .replace(
                     /\.zip$/i,
                     ""
                 )
-                .trim() ||
-            "Proyecto importado";
+                .trim();
+
+        if (!nombreBase) {
+
+            nombreBase =
+                "Proyecto importado";
+        }
 
         const nombre =
             nombreProyectoUnico(
@@ -801,18 +1001,28 @@ async function importarZIP(archivo) {
 
         const proyecto = {
 
-            id: generarId(),
+            id:
+                generarId(),
 
-            name: nombre,
+            name:
+                nombre,
 
-            files,
+            files:
+                files,
 
             folders:
                 [...folders],
 
-            updatedAt: Date.now()
+            updatedAt:
+                Date.now()
 
         };
+
+        /*
+         * MUY IMPORTANTE:
+         * No reemplazamos el proyecto anterior.
+         * Lo añadimos como proyecto nuevo.
+         */
 
         projects.push(
             proyecto
@@ -821,17 +1031,31 @@ async function importarZIP(archivo) {
         currentProjectId =
             proyecto.id;
 
-        guardarProyectos();
+        const guardado =
+            guardarProyectos();
+
+        if (!guardado) {
+
+            projects =
+                projects.filter(
+                    item =>
+                        item.id !==
+                        proyecto.id
+                );
+
+            return;
+        }
 
         cargarProyectoActual();
 
         abrirVistaCodigo();
 
-        const cantidad =
-            Object.keys(files).length;
+        agregarMensajeIA(
+            `✅ Proyecto "${nombre}" importado correctamente.`
+        );
 
         agregarMensajeIA(
-            `✅ Proyecto importado correctamente: ${cantidad} archivos.`
+            `📁 ${cantidad} archivos y ${folders.size} carpetas detectados.`
         );
 
     } catch (error) {
@@ -848,258 +1072,9 @@ async function importarZIP(archivo) {
         agregarMensajeIA(
             "❌ No se pudo importar el proyecto."
         );
-
     }
-
 }
 
 
 // ============================================================
-// IMPORTAR CARPETA
-// ============================================================
-
-if (projectFolderInput) {
-
-    projectFolderInput.addEventListener(
-        "change",
-        async event => {
-
-            const archivos =
-                [...(
-                    event.target.files || []
-                )];
-
-            if (!archivos.length) return;
-
-            try {
-
-                const files = {};
-
-                const folders =
-                    new Set();
-
-                for (const archivo of archivos) {
-
-                    const ruta =
-                        limpiarRuta(
-                            archivo.webkitRelativePath ||
-                            archivo.name
-                        );
-
-                    if (!ruta) continue;
-
-                    files[ruta] =
-                        await archivo.text();
-
-                    asegurarCarpetasPadreEnSet(
-                        ruta,
-                        folders
-                    );
-
-                }
-
-                const nombreBase =
-                    archivos[0]
-                        .webkitRelativePath
-                        ?.split("/")[0] ||
-                    "Proyecto importado";
-
-                const nombre =
-                    nombreProyectoUnico(
-                        nombreBase
-                    );
-
-                const proyecto = {
-
-                    id: generarId(),
-
-                    name: nombre,
-
-                    files,
-
-                    folders:
-                        [...folders],
-
-                    updatedAt: Date.now()
-
-                };
-
-                projects.push(
-                    proyecto
-                );
-
-                currentProjectId =
-                    proyecto.id;
-
-                guardarProyectos();
-
-                cargarProyectoActual();
-
-                abrirVistaCodigo();
-
-                agregarMensajeIA(
-                    `✅ Carpeta importada correctamente: ${Object.keys(files).length} archivos.`
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Error importando carpeta:",
-                    error
-                );
-
-                alert(
-                    "No se pudo importar la carpeta."
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// CARPETAS PADRE
-// ============================================================
-
-function asegurarCarpetasPadreEnSet(
-    ruta,
-    conjunto
-) {
-
-    const partes =
-        ruta.split("/");
-
-    partes.pop();
-
-    let acumulada = "";
-
-    for (const parte of partes) {
-
-        if (!parte) continue;
-
-        acumulada =
-            acumulada
-                ? `${acumulada}/${parte}`
-                : parte;
-
-        conjunto.add(
-            acumulada
-        );
-
-    }
-
-}
-
-
-function asegurarCarpetasPadre(ruta) {
-
-    asegurarCarpetasPadreEnSet(
-        ruta,
-        projectFolders
-    );
-
-}
-
-
-// ============================================================
-// EXISTENCIA
-// ============================================================
-
-function existeArchivo(ruta) {
-
-    return Object.prototype.hasOwnProperty.call(
-        projectFiles,
-        ruta
-    );
-
-}
-
-
-function existeCarpeta(ruta) {
-
-    return projectFolders.has(
-        ruta
-    );
-
-}
-
-
-// ============================================================
-// LENGUAJES
-// ============================================================
-
-function detectarLenguaje(ruta) {
-
-    const extension =
-        ruta
-            .split(".")
-            .pop()
-            .toLowerCase();
-
-    const lenguajes = {
-
-        html: "HTML",
-
-        htm: "HTML",
-
-        css: "CSS",
-
-        js: "JavaScript",
-
-        mjs: "JavaScript",
-
-        cjs: "JavaScript",
-
-        jsx: "JSX",
-
-        ts: "TypeScript",
-
-        tsx: "TSX",
-
-        json: "JSON",
-
-        md: "Markdown",
-
-        markdown: "Markdown",
-
-        svg: "SVG",
-
-        xml: "XML",
-
-        xhtml: "HTML"
-
-    };
-
-    return (
-        lenguajes[extension] ||
-        "Texto"
-    );
-
-}
-
-
-// ============================================================
-// ICONOS
-// ============================================================
-
-function iconoArchivo(ruta) {
-
-    const extension =
-        ruta
-            .split(".")
-            .pop()
-            .toLowerCase();
-
-    const iconos = {
-
-        html: ["◇", "html"],
-        htm: ["◇", "html"],
-
-        css: ["#", "css"],
-
-        js: ["JS", "js"],
-        mjs: ["JS", "js"],
-     
+// IMPORTAR CA
