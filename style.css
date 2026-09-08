@@ -1149,67 +1149,77 @@ button {
     flex: 1;
     min-width: 0;
 }
+/* ============================================================
+   VISTA DE CÓDIGO
+   ============================================================ */
 
-// ============================================================
-// VISTA DE CÓDIGO
-// ============================================================
+.code-view {
+    position: absolute;
+    top: 58px;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-function abrirVistaCodigo() {
-    if (!codeView) return;
+    display: none;
+    flex-direction: column;
 
-    codeView.classList.add("active");
-    codeView.setAttribute("aria-hidden", "false");
+    width: 100%;
+    height: calc(100% - 58px);
 
-    if (aiTool) {
-        aiTool.classList.remove("active-tool");
-    }
-
-    if (previewTool) {
-        previewTool.classList.remove("active-tool");
-    }
-
-    if (codeTool) {
-        codeTool.classList.add("active-tool");
-    }
-
-    renderizarArbolArchivos();
-
-    if (archivoActual && existeArchivo(archivoActual)) {
-        seleccionarArchivo(archivoActual);
-    }
+    background: #08090c;
+    z-index: 9999;
 }
 
-function cerrarVistaCodigo() {
-    if (!codeView) return;
-
-    guardarArchivoActual();
-
-    codeView.classList.remove("active");
-    codeView.setAttribute("aria-hidden", "true");
-
-    if (codeTool) {
-        codeTool.classList.remove("active-tool");
-    }
-
-    if (aiTool) {
-        aiTool.classList.add("active-tool");
-    }
+.code-view.active {
+    display: flex !important;
 }
 
-if (codeTool) {
-    codeTool.addEventListener("click", abrirVistaCodigo);
+/* Cabecera de Código */
 
-    codeTool.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            abrirVistaCodigo();
-        }
-    });
+.code-header {
+    min-height: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid var(--border);
+    background: #0d0f14;
 }
 
-if (closeCode) {
-    closeCode.addEventListener("click", cerrarVistaCodigo);
-            }
+.code-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+}
+
+.code-actions button {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    height: 30px;
+    padding: 0 10px;
+
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+
+    background: #11141a;
+    color: #9fa6b2;
+
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.code-actions button:hover {
+    background: #181c24;
+    color: #ffffff;
+}
+
 /* ============================================================
    CODE HEADER
 ============================================================ */
