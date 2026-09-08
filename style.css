@@ -1150,29 +1150,66 @@ button {
     min-width: 0;
 }
 
+// ============================================================
+// VISTA DE CÓDIGO
+// ============================================================
 
-/* ============================================================
-   CODE VIEW
-============================================================ */
+function abrirVistaCodigo() {
+    if (!codeView) return;
 
-.code-view {
-    position: absolute;
+    codeView.classList.add("active");
+    codeView.setAttribute("aria-hidden", "false");
 
-    inset: 58px 0 0;
+    if (aiTool) {
+        aiTool.classList.remove("active-tool");
+    }
 
-    display: none;
-    flex-direction: column;
+    if (previewTool) {
+        previewTool.classList.remove("active-tool");
+    }
 
-    background: #08090c;
+    if (codeTool) {
+        codeTool.classList.add("active-tool");
+    }
 
-    z-index: 15;
+    renderizarArbolArchivos();
+
+    if (archivoActual && existeArchivo(archivoActual)) {
+        seleccionarArchivo(archivoActual);
+    }
 }
 
-.code-view.active {
-    display: flex;
+function cerrarVistaCodigo() {
+    if (!codeView) return;
+
+    guardarArchivoActual();
+
+    codeView.classList.remove("active");
+    codeView.setAttribute("aria-hidden", "true");
+
+    if (codeTool) {
+        codeTool.classList.remove("active-tool");
+    }
+
+    if (aiTool) {
+        aiTool.classList.add("active-tool");
+    }
 }
 
+if (codeTool) {
+    codeTool.addEventListener("click", abrirVistaCodigo);
 
+    codeTool.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            abrirVistaCodigo();
+        }
+    });
+}
+
+if (closeCode) {
+    closeCode.addEventListener("click", cerrarVistaCodigo);
+            }
 /* ============================================================
    CODE HEADER
 ============================================================ */
